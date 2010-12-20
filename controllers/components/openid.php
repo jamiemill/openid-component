@@ -24,6 +24,7 @@
  * @license http://www.opensource.org/licenses/mit-license.php The MIT License
  */
 class OpenidComponent extends Object {
+	public $components = array('Session');
     private $controller = null;
     private $importPrefix = '';
     private $useDatabase = false;
@@ -160,7 +161,7 @@ class OpenidComponent extends Object {
     }
 
     private function getConsumer() {
-        $consumer = new Auth_OpenID_Consumer($this->getStore());
+        $consumer = new Auth_OpenID_Consumer($this->getStore(), new OpenidSessionStore($this->Session));
 
         if ($this->acceptGoogleApps) {
             new GApps_OpenID_Discovery($consumer);
@@ -306,4 +307,66 @@ class OpenidComponent extends Object {
 
         throw new InvalidArgumentException('Invalid OpenID');
     }
+}
+
+/**
+* A custom session store to be passed into the OpenID library, which makes
+* all session interaction pass through the cakePHP SessionComponent rather than
+* directly accessing $_SESSION.
+*
+* This is supposed to implement the Auth_Yadis_PHPSession "interface", but there's only
+* a Class, not a proper "interface" available.
+*/
+
+App::import('Vendor','Openid.Auth_Yadis_PHPSession', array('file'=>'Auth/Yadis/Manager.php'));
+
+class OpenidSessionStore extends Auth_Yadis_PHPSession {
+
+	function __construct(&$SessionComponent) {
+		$this->SessionComponent = $SessionComponent;
+	}
+
+	/**
+	 * Set a session key/value pair.
+	 *
+	 * @param string $name The name of the session key to add.
+	 * @param string $value The value to add to the session.
+	 */
+	function set($name, $value) {
+	    $this->SessionComponent->write('OpenidSession.'.$name, $value);
+	}
+
+	/**
+	 * Get a key's value from the session.
+	 *
+	 * @param string $name The name of the key to retrieve.
+	 * @param string $default The optional value to return if the key
+	 * is not found in the session.
+	 * @return string $result The key's value in the session or
+	 * $default if it isn't found.
+	 */
+	function get($name, $default=null) {
+	    if ($this->SessionComponent->check('OpenidSession.'.$name)) {
+	        return $this->SessionComponent->read('OpenidSession.'.$name);
+	    } else {
+	        return $default;
+	    }
+	}
+
+	/**
+	 * Remove a key/value pair from the session.
+	 *
+	 * @param string $name The name of the key to remove.
+	 */
+	function del($name) {
+	    $this->SessionComponent->delete('OpenidSession.'.$name);
+	}
+
+	/**
+	 * Return the contents of the session in array form.
+	 */
+	function contents() {
+	    return $this->SessionComponent->read('OpenidSession.'.$name);
+	}
+
 }
