@@ -366,7 +366,7 @@ class OpenidSessionStore extends Auth_Yadis_PHPSession {
 	 * Return the contents of the session in array form.
 	 */
 	function contents() {
-	    return $this->SessionComponent->read('OpenidSession.'.$name);
+	    return $this->SessionComponent->read('OpenidSession');
 	}
 
 }
