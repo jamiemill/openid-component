@@ -209,8 +209,6 @@ class OpenidComponent extends Component {
     }
 
     private function getPluginName() {
-        // If you are not using file-based cacheing, then the "Folder" class may not be loaded.
-        require_once LIBS . 'folder.php';
         $result = array();
         App::uses('Folder', 'Utility');
         $ds = (Folder::isWindowsPath(__FILE__)) ? '\\\\' : DS;
