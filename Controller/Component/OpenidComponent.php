@@ -36,7 +36,9 @@ class OpenidComponent extends Component {
         $this->handleSettings($settings);
 
         // XXX ensure the session is started to avoid "Undefined variable _SESSION" notices from the OpenID lib
-        session_start();
+		if(!isset($_SESSION)) {
+			session_start();
+		}
 
         $pathToVendorsFolder = $this->getPathToVendorsFolderWithOpenIDLibrary();
 
@@ -294,7 +296,7 @@ class OpenidComponent extends Component {
             throw new Exception('Could not redirect to server: '.$formHtml->message);
         }
 
-        echo '<html><head><title>' . __('OpenID Authentication Redirect', true) . '</title></head>'.
+        echo '<html><head><title>' . __('OpenID Authentication Redirect') . '</title></head>'.
              "<body onload='document.getElementById(\"".$formId."\").submit()'>".
              $formHtml.'</body></html>';
         exit;
